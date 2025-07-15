@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useDevice } from '../../contexts/DeviceContext';
@@ -10,6 +10,8 @@ const Finder = () => {
   const [searchQuery, setSearchQuery] = useState('');
   // Store layout mode per section
   const [sectionViewMode, setSectionViewMode] = useState({}); // { sectionId: 'list' | 'grid' }
+  // Track which experience card is expanded
+  const [expandedExperience, setExpandedExperience] = useState(null);
   const searchInputRef = useRef(null);
 
   // Helper to get view mode for current section
@@ -45,13 +47,64 @@ const Finder = () => {
             title: "Production Planner",
             company: "Kruger (Canada)",
             period: "OCT 2022 – Present",
-            description: "Managed annual inventory exceeding 398 K tons (≈ $318 M USD) and assets approaching $1 B USD over 3 years while sustaining OTIF >98%."
+            description: [
+              "Managed annual inventory exceeding 398,000 tons (valued at over $318 million USD/year), overseeing assets worth nearly $1 billion USD over 3 years.",
+              "Leveraged AI-driven analytics and predictive modeling to optimize production schedules and inventory management, resulting in data-backed decision making and improved forecast accuracy.",
+              "Coordinated and executed production scheduling activities using advanced ERP systems, ensuring optimal resource utilization and on-time delivery.",
+              "Developed and maintained master data (BOMs, routings) and capacity requirements plans to support dynamic production environments.",
+              "Built interactive dashboards in Power BI and Excel for live inventory breakdowns, sales vs production, demand vs supply timelines, and real-time order processing, enabling real-time business intelligence across the organization.",
+              "Applied machine learning techniques to identify demand patterns, reduce wastage, and enhance supply chain agility.",
+              "Analyzed inventory management metrics, identified bottlenecks, and implemented process improvements to enhance operational efficiency.",
+              "Collaborated with manufacturing, quality control, warehouse, and procurement teams to drive cross-functional effectiveness and resolve production challenges.",
+              "Conducted “what-if” scenario analyses and provided strategic recommendations to management for capacity planning and risk mitigation.",
+              "Automated and streamlined reporting processes using SAP and Excel, delivering actionable insights for continuous improvement.",
+              "Audited and ensured inventory integrity and accuracy, including performing production and scrap reporting.",
+              "Created and optimized production schedules, balancing customer demand, inventory targets, and cost control.",
+              "Developed and distributed monthly reports on inventory, production conformance, and supply chain KPIs to senior leadership.",
+              "Drove process improvements in demand and production planning, contributing to company-wide cost savings and service level enhancements.",
+              "Achieved year-end inventory targets, surpassing sales targets by 10,000+ Tons.",
+              "",
+              "Key Achievements:",
+              "- Reduced inventory holding costs by 12% through implementation of AI-powered demand forecasting and process automation.",
+              "- Designed and deployed real-time Power BI dashboards, improving management visibility and speeding up decision cycles by 40%.",
+              "- Recognized by senior leadership for driving digital transformation initiatives and fostering a data-driven culture across planning and operations."
+            ]
           },
           {
             title: "Marketing Intern",
             company: "Jindal Steelworks (India)",
             period: "DEC 2018 – MAR 2019",
             description: "Supported ERP (Oracle E-Biz) migration and created sales analytics reports reducing manual effort by 30%."
+          },
+          {
+            title: "Strategic Consultant",
+            company: "Kamloops Film Society",
+            period: "MAR 2022 – AUG 2022",
+            description: "Presented post-COVID business models to the board; conducted gap analysis and proposed new revenue streams."
+          },
+          {
+            title: "Strategic Consultant",
+            company: "House of Carmond, Kamloops",
+            period: "MAR 2022 – AUG 2022",
+            description: "Delivered market reports, demographic analysis and feasibility studies to management."
+          },
+          {
+            title: "Photolab Specialist + Tech Specialist",
+            company: "London Drugs (Canada)",
+            period: "SEP 2021 – OCT 2022",
+            description: "Managed photolab operations and provided technical support, demonstrating customer service excellence while studying."
+          },
+          {
+            title: "Sales Associate",
+            company: "Total Pet (Canada)",
+            period: "FEB 2021 – JUL 2021",
+            description: "Handled retail sales, inventory management and customer engagement."
+          },
+          {
+            title: "Product Process Specialist",
+            company: "Best Buy Canada",
+            period: "OCT 2020 – JAN 2021",
+            description: "Oversaw product process flows and supported merchandising teams."
           }
         ]
       },
@@ -194,56 +247,7 @@ const Finder = () => {
           ))}
         </div>
         
-        <div className={`flex items-center ${isMobile ? 'w-full' : 'space-x-2'} transition-all duration-300`}>
-          <div className="relative flex-grow mr-2 group">
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search..."
-              className="pl-8 pr-7 py-1 rounded-md border border-white border-opacity-20 bg-white bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm w-full text-white placeholder-gray-300 transition-all duration-300"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <svg className="w-4 h-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            {searchQuery && (
-              <button
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-red-400 focus:text-red-500 transition-colors"
-                onClick={() => { setSearchQuery(''); searchInputRef.current?.focus(); }}
-                aria-label="Clear search"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-          </div>
-          
-          <div className="flex border rounded overflow-hidden border-white border-opacity-20 shadow-sm bg-white/10 backdrop-blur-sm">
-            {/* Layout toggle buttons */}
-            <button
-              className={`px-2 py-1 text-sm transition-all duration-200 ${getViewMode() === 'list' ? 'bg-blue-400/30 text-blue-100 shadow-inner scale-105' : 'hover:bg-white hover:bg-opacity-10'} rounded-l`}
-              onClick={() => setViewMode('list')}
-              title="List View"
-              aria-pressed={getViewMode() === 'list'}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            <button
-              className={`px-2 py-1 text-sm transition-all duration-200 ${getViewMode() === 'grid' ? 'bg-blue-400/30 text-blue-100 shadow-inner scale-105' : 'hover:bg-white hover:bg-opacity-10'} rounded-r`}
-              onClick={() => setViewMode('grid')}
-              title="Grid View"
-              aria-pressed={getViewMode() === 'grid'}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h4v4H4V6zm6 0h4v4h-4V6zm6 0h4v4h-4V6zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z" />
-              </svg>
-            </button>
-          </div>
-        </div>
+        {/* Search box and layout buttons removed */}
       </div>
 
       <div className={`flex-1 ${isMobile ? 'flex flex-col' : 'flex'} overflow-hidden min-h-0`}>
@@ -387,39 +391,72 @@ const Finder = () => {
         exp.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }).map((exp, index) => (
-      <motion.div key={index} variants={itemVariants} className="bg-white bg-opacity-10 rounded-lg p-4 border border-white border-opacity-10 hover:shadow-lg hover:bg-opacity-20 transition-all">
-        <h3 className="text-xl font-semibold text-blue-300">{highlightMatch(exp.title)}</h3>
+      <motion.div 
+        key={index} 
+        variants={itemVariants}
+        className={`bg-white bg-opacity-10 rounded-lg p-4 border border-white border-opacity-10 transition-all cursor-pointer ${expandedExperience === index ? 'shadow-lg bg-opacity-20' : 'hover:shadow-lg hover:bg-opacity-20'}`}
+        onClick={() => setExpandedExperience(expandedExperience === index ? null : index)}
+      >
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-semibold text-blue-300">{highlightMatch(exp.title)}</h3>
+          <span className="text-gray-300 text-lg">{expandedExperience === index ? '▲' : '▼'}</span>
+        </div>
         <div className={`${isMobile ? 'flex flex-col space-y-1' : 'flex justify-between items-center'} mb-2`}>
           <span className="text-gray-200">{highlightMatch(exp.company)}</span>
           <span className="text-gray-300 text-sm">{exp.period}</span>
         </div>
-        <p className="text-gray-200">{highlightMatch(exp.description)}</p>
+        <AnimatePresence>
+          {expandedExperience === index && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="text-gray-200 mt-2"
+            >
+              {Array.isArray(exp.description) ? (
+                <ul className="list-disc pl-5 space-y-1">
+                  {exp.description.map((point, i) =>
+                    point.trim() === "Key Achievements:" ? (
+                      <li key={i} className="mt-4 mb-1 font-semibold text-blue-300">Key Achievements:</li>
+                    ) : point.startsWith("-") ? (
+                      <li key={i} className="ml-4">{point.slice(1).trim()}</li>
+                    ) : (
+                      <li key={i}>{point}</li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <span>{highlightMatch(exp.description)}</span>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     ))}
   </div>
 )}
-                    
-                    {section.id === "education" && (
-  <div className={`w-full transition-all duration-300 ${getViewMode() === 'grid' && !isMobile ? 'grid grid-cols-2 gap-6' : 'space-y-6'}`}>
-    {section.content.filter(edu => {
-      if (!searchQuery) return true;
-      return (
-        edu.degree.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        edu.institution.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        edu.details.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }).map((edu, index) => (
-      <motion.div key={index} variants={itemVariants} className="bg-white bg-opacity-10 rounded-lg p-4 border border-white border-opacity-10 hover:shadow-lg hover:bg-opacity-20 transition-all">
-        <h3 className="text-xl font-semibold text-blue-300">{highlightMatch(edu.degree)}</h3>
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-gray-200">{highlightMatch(edu.institution)}</span>
-          <span className="text-gray-300 text-sm">{edu.year}</span>
-        </div>
-        <p className="text-gray-200">{highlightMatch(edu.details)}</p>
-      </motion.div>
-    ))}
-  </div>
-)}
+    {section.id === "education" && (
+      <div className={`w-full transition-all duration-300 ${getViewMode() === 'grid' && !isMobile ? 'grid grid-cols-2 gap-6' : 'space-y-6'}`}>
+        {section.content.filter(edu => {
+          if (!searchQuery) return true;
+          return (
+            edu.degree.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            edu.institution.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            edu.details.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }).map((edu, index) => (
+          <motion.div key={index} variants={itemVariants} className="bg-white bg-opacity-10 rounded-lg p-4 border border-white border-opacity-10 hover:shadow-lg hover:bg-opacity-20 transition-all">
+            <h3 className="text-xl font-semibold text-blue-300">{highlightMatch(edu.degree)}</h3>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-gray-200">{highlightMatch(edu.institution)}</span>
+              <span className="text-gray-300 text-sm">{edu.year}</span>
+            </div>
+            <p className="text-gray-200">{highlightMatch(edu.details)}</p>
+          </motion.div>
+        ))}
+      </div>
+    )}
+
                     
                     {section.id === "skills" && (
   <div className={`w-full transition-all duration-300 ${getViewMode() === 'grid' && !isMobile ? 'grid grid-cols-2 gap-6' : 'space-y-6'}`}>
@@ -482,8 +519,6 @@ const Finder = () => {
                             <div>
                               <h3 className="text-lg font-semibold text-blue-300">{highlightMatch(cert.name)}</h3>
                               <p className="text-gray-200">{highlightMatch(cert.issuer)}</p>
-                              <h3 className="text-lg font-semibold text-blue-300">{cert.name}</h3>
-                              <p className="text-gray-200">{cert.issuer}</p>
                             </div>
                             <span className="text-gray-300">{cert.year}</span>
                           </motion.div>

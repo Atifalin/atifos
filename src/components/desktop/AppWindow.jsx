@@ -40,7 +40,7 @@ const AppWindow = ({ app, isActive, onClose, onFocus, onMinimize }) => {
   // Start drag when mousedown on the header
   const startDrag = (event) => {
     if (!isMaximized) {
-      dragControls.start(event);
+      dragControls.start(event, { snapToCursor: false });
       onFocus();
     }
   };
@@ -107,7 +107,7 @@ const AppWindow = ({ app, isActive, onClose, onFocus, onMinimize }) => {
   return (
     <motion.div
       ref={windowRef}
-      className={`window absolute rounded-xl overflow-hidden shadow-xl flex flex-col ${isActive ? 'z-20' : 'z-10'}`}
+      className={`window absolute rounded-xl overflow-hidden shadow-xl flex flex-col ${isActive ? 'z-20' : 'z-10'} pointer-events-auto`}
       style={{ 
         width: `${size.width}px`, 
         height: `${size.height}px`,
@@ -127,10 +127,11 @@ const AppWindow = ({ app, isActive, onClose, onFocus, onMinimize }) => {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       onClick={handleWindowClick}
       drag={!isMaximized}
+      dragListener={false} // Disable automatic drag detection
       dragControls={dragControls}
       dragMomentum={false}
       dragElastic={0}
-      dragConstraints={{ left: -position.x, right: window.innerWidth - position.x - 100, top: -position.y + 30, bottom: window.innerHeight - position.y - 100 }}
+      dragConstraints={{ left: 0, right: window.innerWidth - size.width, top: 0, bottom: window.innerHeight - size.height }}
       onDragEnd={(e, info) => {
         setPosition(prev => ({
           x: prev.x + info.offset.x,
@@ -142,6 +143,8 @@ const AppWindow = ({ app, isActive, onClose, onFocus, onMinimize }) => {
       <div 
         className="window-header h-8 flex items-center justify-between px-3 cursor-move bg-white bg-opacity-5 backdrop-blur-sm border-b border-white border-opacity-10"
         onPointerDown={startDrag}
+        onMouseDown={startDrag}
+        style={{ touchAction: 'none' }}
       >
         <div className="flex items-center space-x-2">
           {/* Close button */}

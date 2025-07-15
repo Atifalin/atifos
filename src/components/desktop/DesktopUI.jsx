@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useProfile } from '../../contexts/ProfileContext';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TopBar from './TopBar';
 import Dock from './Dock';
@@ -7,7 +6,6 @@ import AppWindow from './AppWindow';
 import { useDevice } from '../../contexts/DeviceContext';
 
 const DesktopUI = () => {
-  const { currentProfile } = useProfile();
   // --- Add a class to body to fix centering only when DesktopUI is active ---
   useEffect(() => {
     document.body.classList.add('desktop-root-active');
@@ -60,35 +58,29 @@ const DesktopUI = () => {
     setActiveAppId(appId);
   };
 
-  // Gradient classes per profile (tailwind colors must be present at build)
-  const gradientMap = useMemo(() => ({
-    Employer: 'bg-gradient-to-br from-blue-900 via-indigo-800 to-blue-600',
-    Friends:  'bg-gradient-to-br from-pink-600 via-red-500 to-yellow-500',
-    Family:   'bg-gradient-to-br from-green-400 via-teal-400 to-blue-400',
-  }), []);
-  const gradientClass = gradientMap[currentProfile] || gradientMap.Employer;
-
   return (
     <div className="relative w-screen h-screen overflow-hidden select-none">
-      {/* Animated profile-specific wallpaper */}
+      {/* Animated macOS wallpaper background */}
       <motion.div
-        key={currentProfile}
-        className={`absolute inset-0 z-0 ${gradientMap[currentProfile] || gradientMap.Employer}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 1.2 }}
+        className="absolute inset-0 z-0 bg-gradient-to-br from-[#313b5b] via-[#384e6b] to-[#1e2746]"
+        initial={{ opacity: 0.95 }}
+        animate={{ opacity: [0.95, 1, 0.95] }}
+        transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse' }}
       />
       {/* Glassy blur overlay for desktop effect */}
       <div className="absolute inset-0 z-0 backdrop-blur-2xl bg-white/15" style={{WebkitBackdropFilter:'blur(32px)'}} />
 
       {/* Top Bar */}
-      <div className="relative z-50">
-        <TopBar openApps={openApps} activeAppId={activeAppId} onQuickAppClick={handleOpenApp} />
+      <div className="relative z-20">
+        <TopBar 
+          openApps={openApps} 
+          activeAppId={activeAppId} 
+          onQuickAppClick={handleOpenApp} 
+        />
       </div>
 
       {/* App Windows */}
-      <div className="absolute inset-0 z-30">
+      <div className="absolute inset-0 z-30 pointer-events-none">
         <AnimatePresence>
           {openApps.map(app => (
             !app.isMinimized && (

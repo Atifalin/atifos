@@ -3,9 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useProfile } from '../../contexts/ProfileContext';
 
 const TopBar = ({ openApps = [], activeAppId = null, onQuickAppClick = () => {} }) => {
-  const handleLogout = () => {
-    window.dispatchEvent(new Event('logout'));
-  };
   const { currentProfile } = useProfile();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -142,7 +139,46 @@ const TopBar = ({ openApps = [], activeAppId = null, onQuickAppClick = () => {} 
           <div className="w-2 h-2 rounded-full bg-green-400"></div>
           <span>Online</span>
         </div>
-        <div className="cursor-pointer hover:underline" title="Logout" onClick={handleLogout}>{currentProfile}</div>
+        {/* Profile with dropdown */}
+        <div 
+          className="relative px-2 py-1 rounded-md cursor-pointer hover:bg-gray-700 hover:bg-opacity-30 flex items-center gap-1"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleDropdown('profile');
+          }}
+        >
+          <span className="mr-1">👤</span>
+          <span>{currentProfile}</span>
+          
+          {/* Profile dropdown menu */}
+          <AnimatePresence>
+            {activeDropdown === 'profile' && (
+              <motion.div 
+                className="absolute top-full right-0 mt-1 w-48 bg-white bg-opacity-15 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden z-50 border border-white border-opacity-20"
+                initial={{ opacity: 0, y: -5, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -5, scale: 0.98 }}
+                transition={{ duration: 0.2, type: 'spring', stiffness: 400, damping: 30 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="py-1">
+                  <div className="px-4 py-2 text-sm hover:bg-white hover:bg-opacity-20 cursor-pointer transition-colors duration-150 ease-in-out flex items-center gap-2">
+                    <span className="opacity-90">Settings</span>
+                  </div>
+                  <div 
+                    className="px-4 py-2 text-sm hover:bg-white hover:bg-opacity-20 cursor-pointer transition-colors duration-150 ease-in-out flex items-center gap-2 text-red-400"
+                    onClick={() => {
+                      // Redirect to login page
+                      window.location.href = '/';
+                    }}
+                  >
+                    <span>Logout</span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </motion.div>
   );

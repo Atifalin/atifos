@@ -234,16 +234,6 @@ function App() {
     setAppState('os')
   }
 
-  // Listen for global logout event
-  useEffect(() => {
-    const handleLogout = () => {
-      setLoggedIn(false);
-      setAppState('login');
-    };
-    window.addEventListener('logout', handleLogout);
-    return () => window.removeEventListener('logout', handleLogout);
-  }, []);
-
   return (
     <div className="app-container">
       <AnimatePresence mode="wait">
