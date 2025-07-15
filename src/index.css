@@ -21,11 +21,27 @@
   body {
     @apply m-0 flex min-h-screen min-w-[320px] place-items-center;
   }
-
   h1 {
     @apply text-[3.2em] leading-[1.1];
   }
 }
+
+/* --- DesktopUI centering override --- */
+.desktop-root-active body,
+.desktop-root-active html {
+  display: block !important;
+  width: 100vw !important;
+  min-width: 0 !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+  overflow-x: hidden !important;
+  position: static !important;
+  left: 0 !important;
+  top: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 
 @layer components {
   .glass-effect {

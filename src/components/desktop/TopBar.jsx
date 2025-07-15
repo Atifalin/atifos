@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useProfile } from '../../contexts/ProfileContext';
 
 const TopBar = ({ openApps = [], activeAppId = null, onQuickAppClick = () => {} }) => {
+  const handleLogout = () => {
+    window.dispatchEvent(new Event('logout'));
+  };
   const { currentProfile } = useProfile();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -139,7 +142,7 @@ const TopBar = ({ openApps = [], activeAppId = null, onQuickAppClick = () => {} 
           <div className="w-2 h-2 rounded-full bg-green-400"></div>
           <span>Online</span>
         </div>
-        <div>{currentProfile}</div>
+        <div className="cursor-pointer hover:underline" title="Logout" onClick={handleLogout}>{currentProfile}</div>
       </div>
     </motion.div>
   );
