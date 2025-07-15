@@ -25,7 +25,11 @@ const MobileWrapper = () => {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-blue-900 via-purple-800 to-pink-700">
+    <div className="h-screen w-screen overflow-hidden" style={{
+      backgroundImage: 'linear-gradient(135deg, #2a5298, #1e3c72, #2a5298)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }}>
       {activeApp ? (
         // App panel when an app is open
         <MobileAppPanel 

@@ -1,15 +1,17 @@
 import { motion } from 'framer-motion';
 
-// Define app icons for the grid
+// Define app icons for the grid based on QRD.md
 const appIcons = [
   { id: 'finder', name: 'Resume', icon: '📁', component: 'Finder' },
   { id: 'terminal', name: 'Chat', icon: '💬', component: 'Terminal' },
   { id: 'resume', name: 'PDF', icon: '📄', component: 'ResumeViewer' },
-  { id: 'photos', name: 'Photos', icon: '🖼️', component: 'Photos' },
+  { id: 'calculator', name: 'Calculator', icon: '🧮', component: 'Calculator' },
+  { id: 'calendar', name: 'Calendar', icon: '📅', component: 'Calendar' },
+  { id: 'clock', name: 'Clock', icon: '⏰', component: 'Clock' },
+  { id: 'photos', name: 'Gallery', icon: '🖼️', component: 'Photos' },
   { id: 'about', name: 'About', icon: 'ℹ️', component: 'AboutThisOS' },
   { id: 'settings', name: 'Settings', icon: '⚙️', component: 'Settings' },
   { id: 'trash', name: 'Archive', icon: '🗑️', component: 'Trash' },
-  { id: 'contact', name: 'Contact', icon: '📧', component: 'Contact' },
 ];
 
 const AppGrid = ({ onAppClick }) => {
@@ -54,10 +56,10 @@ const AppGrid = ({ onAppClick }) => {
           whileTap={{ scale: 0.95 }}
           onClick={() => handleAppClick(app)}
         >
-          <div className="glass-effect w-16 h-16 rounded-xl flex items-center justify-center text-3xl mb-1">
+          <div className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl mb-1 bg-white bg-opacity-15 backdrop-blur-md border border-white border-opacity-20 shadow-lg">
             {app.icon}
           </div>
-          <span className="text-xs text-white">{app.name}</span>
+          <span className="text-xs text-white font-medium">{app.name}</span>
         </motion.div>
       ))}
     </motion.div>

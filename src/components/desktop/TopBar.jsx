@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProfile } from '../../contexts/ProfileContext';
 
-const TopBar = ({ openApps = [], activeAppId = null }) => {
+const TopBar = ({ openApps = [], activeAppId = null, onQuickAppClick = () => {} }) => {
   const { currentProfile } = useProfile();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -114,12 +114,22 @@ const TopBar = ({ openApps = [], activeAppId = null }) => {
         {getActiveAppName()}
       </div>
       
-      {/* Right side - Status */}
+      {/* Right side - Quick Apps & Status */}
       <div className="flex items-center space-x-4 text-sm">
-        <div className="px-2 py-1 rounded-md hover:bg-gray-700 hover:bg-opacity-30 cursor-pointer">
+        {/* Quick-launch: none. Calendar/Clock are now on date/time click below. */}
+        {/* Status icons */}
+        <div
+          className="px-2 py-1 rounded-md hover:bg-blue-400/20 cursor-pointer transition-colors"
+          title="Open Calendar"
+          onClick={() => onQuickAppClick({ id: 'calendar', title: 'Calendar', component: 'Calendar', icon: '📅' })}
+        >
           {formattedDate}
         </div>
-        <div className="px-2 py-1 rounded-md hover:bg-gray-700 hover:bg-opacity-30 cursor-pointer">
+        <div
+          className="px-2 py-1 rounded-md hover:bg-blue-400/20 cursor-pointer transition-colors"
+          title="Open Clock"
+          onClick={() => onQuickAppClick({ id: 'clock', title: 'Clock', component: 'Clock', icon: '⏰' })}
+        >
           {formattedTime}
         </div>
         <div className="cursor-pointer hover:text-gray-300">🔊</div>

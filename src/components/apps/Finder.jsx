@@ -1,12 +1,20 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProfile } from '../../contexts/ProfileContext';
+import { useDevice } from '../../contexts/DeviceContext';
 
 const Finder = () => {
   const { currentProfile } = useProfile();
+  const { isMobile } = useDevice();
   const [activeSection, setActiveSection] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState('list'); // list or grid
+  // Store layout mode per section
+  const [sectionViewMode, setSectionViewMode] = useState({}); // { sectionId: 'list' | 'grid' }
+  const searchInputRef = useRef(null);
+
+  // Helper to get view mode for current section
+  const getViewMode = () => sectionViewMode[activeSection] || 'list';
+  const setViewMode = (mode) => setSectionViewMode((prev) => ({ ...prev, [activeSection]: mode }));
 
   // Sample resume data
   const resumeData = {
@@ -133,143 +141,222 @@ const Finder = () => {
     visible: { y: 0, opacity: 1 }
   };
 
+  // Filter and highlight content based on search query
+  const highlightMatch = (text) => {
+    if (!searchQuery) return text;
+    const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return text.split(regex).map((part, i) =>
+      regex.test(part) ? <mark key={i} className="bg-yellow-300 bg-opacity-40 text-yellow-900 px-1 rounded">{part}</mark> : part
+    );
+  };
+
+  const filteredSections = resumeData.sections.filter(section => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    // Check if section title matches
+    if (section.title.toLowerCase().includes(query)) return true;
+    // Check if any content matches based on section type
+    if (section.content) {
+      return section.content.some(item => {
+        if (typeof item === 'object') {
+          return Object.values(item).some(value => 
+            typeof value === 'string' && value.toLowerCase().includes(query)
+          );
+        }
+        return false;
+      });
+    }
+    return false;
+  });
+
   return (
-    <div className="h-full flex flex-col">
-      {/* Toolbar */}
-      <div className="bg-gray-800 border-b border-gray-700 p-2 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <button className="p-1 rounded hover:bg-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+    <div className="h-full flex flex-col bg-gradient-to-br from-white/20 via-white/10 to-blue-200/10 backdrop-blur-2xl text-gray-100 overflow-hidden border border-white border-opacity-25 shadow-2xl transition-all duration-300 relative">
+      {/* Finder toolbar - responsive for mobile/desktop */}
+      <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} justify-between px-4 py-2 border-b border-white border-opacity-25 flex-shrink-0 bg-white/10 backdrop-blur-xl transition-all duration-300`}>
+        <div className={`flex items-center ${isMobile ? 'mb-2 overflow-x-auto pb-1 w-full' : 'space-x-2'} transition-all duration-300`}>
+          <button 
+            className={`p-1 rounded ${activeSection === 'overview' ? 'bg-white bg-opacity-20' : 'hover:bg-white hover:bg-opacity-10'}`}
+            onClick={() => setActiveSection('overview')}
+          >
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
           </button>
-          <button className="p-1 rounded hover:bg-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          </button>
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Search"
-              className="bg-gray-700 text-white text-sm rounded-md px-3 py-1 w-48 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          
+          {resumeData.sections.map(section => (
+            <button 
+              key={section.id}
+              className={`p-1 rounded ${isMobile ? 'mx-1' : ''} ${activeSection === section.id ? 'bg-white bg-opacity-20' : 'hover:bg-white hover:bg-opacity-10'}`}
+              onClick={() => setActiveSection(section.id)}
+            >
+              <span className="text-lg">{section.icon}</span>
+            </button>
+          ))}
+        </div>
+        
+        <div className={`flex items-center ${isMobile ? 'w-full' : 'space-x-2'} transition-all duration-300`}>
+          <div className="relative flex-grow mr-2 group">
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search..."
+              className="pl-8 pr-7 py-1 rounded-md border border-white border-opacity-20 bg-white bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm w-full text-white placeholder-gray-300 transition-all duration-300"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            <svg className="w-4 h-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
             {searchQuery && (
-              <button 
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200"
-                onClick={() => setSearchQuery("")}
+              <button
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-red-400 focus:text-red-500 transition-colors"
+                onClick={() => { setSearchQuery(''); searchInputRef.current?.focus(); }}
+                aria-label="Clear search"
               >
-                ×
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             )}
           </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <button 
-            className={`p-1 rounded ${viewMode === 'list' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
-            onClick={() => setViewMode("list")}
-            title="List View"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-            </svg>
-          </button>
-          <button 
-            className={`p-1 rounded ${viewMode === 'grid' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
-            onClick={() => setViewMode("grid")}
-            title="Grid View"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-          </button>
+          
+          <div className="flex border rounded overflow-hidden border-white border-opacity-20 shadow-sm bg-white/10 backdrop-blur-sm">
+            {/* Layout toggle buttons */}
+            <button
+              className={`px-2 py-1 text-sm transition-all duration-200 ${getViewMode() === 'list' ? 'bg-blue-400/30 text-blue-100 shadow-inner scale-105' : 'hover:bg-white hover:bg-opacity-10'} rounded-l`}
+              onClick={() => setViewMode('list')}
+              title="List View"
+              aria-pressed={getViewMode() === 'list'}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <button
+              className={`px-2 py-1 text-sm transition-all duration-200 ${getViewMode() === 'grid' ? 'bg-blue-400/30 text-blue-100 shadow-inner scale-105' : 'hover:bg-white hover:bg-opacity-10'} rounded-r`}
+              onClick={() => setViewMode('grid')}
+              title="Grid View"
+              aria-pressed={getViewMode() === 'grid'}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h4v4H4V6zm6 0h4v4h-4V6zm6 0h4v4h-4V6zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
-      
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-56 bg-gray-800 border-r border-gray-700 overflow-y-auto p-2">
-          <div className="mb-4">
-            <h3 className="text-xs uppercase text-gray-500 font-semibold px-2 mb-2">Favorites</h3>
-            <div 
-              className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer ${activeSection === "overview" ? "bg-blue-500 bg-opacity-70 text-white" : "text-gray-300 hover:bg-gray-700"}`}
-              onClick={() => setActiveSection("overview")}
-            >
-              <span className="text-lg">👤</span>
-              <span>Overview</span>
-            </div>
-            <div 
-              className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer ${activeSection === "full-resume" ? "bg-blue-500 bg-opacity-70 text-white" : "text-gray-300 hover:bg-gray-700"}`}
-              onClick={() => setActiveSection("full-resume")}
-            >
-              <span className="text-lg">📄</span>
-              <span>Full Resume</span>
-            </div>
-          </div>
-          
-          <div>
-            <h3 className="text-xs uppercase text-gray-500 font-semibold px-2 mb-2">Resume Sections</h3>
-            {resumeData.sections.map((section) => (
+
+      <div className={`flex-1 ${isMobile ? 'flex flex-col' : 'flex'} overflow-hidden min-h-0`}>
+        {/* Sidebar - conditionally shown based on device */}
+        {!isMobile && (
+          <div className="w-56 bg-white bg-opacity-10 border-r border-white border-opacity-20 overflow-y-auto p-2 flex-shrink-0">
+            <div className="mb-4">
+              <h3 className="text-xs uppercase text-white text-opacity-60 font-semibold px-2 mb-2">Favorites</h3>
               <div 
-                key={section.id}
-                className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer ${activeSection === section.id ? "bg-blue-500 bg-opacity-70 text-white" : "text-gray-300 hover:bg-gray-700"}`}
-                onClick={() => setActiveSection(section.id)}
+                className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer ${activeSection === "overview" ? "bg-white bg-opacity-20 text-white" : "text-gray-100 hover:bg-white hover:bg-opacity-10"}`}
+                onClick={() => setActiveSection("overview")}
               >
-                <span className="text-lg">{section.icon}</span>
-                <span>{section.title}</span>
+                <span className="text-lg">👤</span>
+                <span>Overview</span>
               </div>
-            ))}
+              <div 
+                className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer ${activeSection === "full-resume" ? "bg-white bg-opacity-20 text-white" : "text-gray-100 hover:bg-white hover:bg-opacity-10"}`}
+                onClick={() => setActiveSection("full-resume")}
+              >
+                <span className="text-lg">📄</span>
+                <span>Full Resume</span>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-xs uppercase text-white text-opacity-60 font-semibold px-2 mb-2">Resume Sections</h3>
+              {resumeData.sections.map((section) => (
+                <div 
+                  key={section.id}
+                  className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer ${activeSection === section.id ? "bg-white bg-opacity-20 text-white" : "text-gray-100 hover:bg-white hover:bg-opacity-10"}`}
+                  onClick={() => setActiveSection(section.id)}
+                >
+                  <span className="text-lg">{section.icon}</span>
+                  <span>{section.title}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         
-        {/* Content area */}
-        <div className="flex-1 overflow-y-auto bg-gray-900 p-6">
+        {/* Content area - responsive for mobile/desktop */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0">
+          {/* Mobile section selector (only shown on mobile) */}
+          {isMobile && (
+            <div className="mb-4 bg-white bg-opacity-10 rounded-lg p-2 border border-white border-opacity-20 flex-shrink-0">
+              <select 
+                className="w-full bg-transparent text-white border-0 focus:ring-0 focus:outline-none"
+                value={activeSection}
+                onChange={(e) => setActiveSection(e.target.value)}
+              >
+                <option value="overview" className="bg-gray-800">Overview</option>
+                <option value="full-resume" className="bg-gray-800">Full Resume</option>
+                {resumeData.sections.map(section => (
+                  <option key={section.id} value={section.id} className="bg-gray-800">
+                    {section.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          
           <AnimatePresence mode="wait">
             <motion.div
               key={activeSection}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="h-full"
             >
               {activeSection === "overview" && (
                 <motion.div 
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="bg-gray-800 rounded-lg p-6 shadow-lg max-w-3xl mx-auto"
+                  className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-20"
                 >
-                  <div className="flex items-start">
-                    <div className="mr-6">
-                      <div className="w-32 h-32 rounded-full bg-blue-600 flex items-center justify-center text-5xl overflow-hidden">
+                  <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-start w-full`}>
+                    <div className={`${isMobile ? 'mb-4 flex justify-center w-full' : 'mr-6'}`}>
+                      <div className="w-32 h-32 rounded-full bg-blue-600 flex items-center justify-center text-5xl overflow-hidden border-2 border-white border-opacity-30">
                         <img src="/assets/Mo.png" alt="Profile" className="w-full h-full object-cover" />
                       </div>
                     </div>
                     <div className="flex-1">
-                      <motion.h1 variants={itemVariants} className="text-3xl font-bold mb-2">{resumeData.overview.name}</motion.h1>
-                      <motion.h2 variants={itemVariants} className="text-xl text-blue-400 mb-4">{resumeData.overview.title}</motion.h2>
-                      <motion.p variants={itemVariants} className="text-gray-300 mb-6">{resumeData.overview.summary}</motion.p>
+                      <motion.h1 variants={itemVariants} className="text-2xl md:text-3xl font-bold mb-2">{resumeData.overview.name}</motion.h1>
+                      <motion.h2 variants={itemVariants} className="text-lg md:text-xl text-blue-300 mb-4">{resumeData.overview.title}</motion.h2>
+                      <motion.p variants={itemVariants} className="text-gray-200 mb-6">{resumeData.overview.summary}</motion.p>
                       
-                      <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+                      <motion.div variants={itemVariants} className={`grid ${isMobile ? 'grid-cols-1 gap-2' : 'grid-cols-2 gap-4'} w-full`}>
                         <div className="flex items-center space-x-2">
-                          <span className="text-gray-400">📍</span>
-                          <span className="text-gray-300">{resumeData.overview.location}</span>
+                          <span className="text-gray-300">📍</span>
+                          <span className="text-gray-200">{resumeData.overview.location}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-gray-400">📧</span>
-                          <span className="text-gray-300">{resumeData.overview.contact.email}</span>
+                          <span className="text-gray-300">📧</span>
+                          <span className="text-gray-200">{resumeData.overview.contact.email}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-gray-400">📱</span>
-                          <span className="text-gray-300">{resumeData.overview.contact.phone}</span>
+                          <span className="text-gray-300">📱</span>
+                          <span className="text-gray-200">{resumeData.overview.contact.phone}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-gray-400">🔗</span>
-                          <span className="text-gray-300">{resumeData.overview.contact.linkedin}</span>
+                          <span className="text-gray-300">🔗</span>
+                          <span className="text-gray-200">{resumeData.overview.contact.linkedin}</span>
                         </div>
+                      </motion.div>
+                      
+                      <motion.div variants={itemVariants} className="mt-6">
+                        <h3 className="text-lg font-semibold text-blue-300 mb-2">Key Achievements</h3>
+                        <ul className="list-disc pl-5 space-y-1">
+                          {resumeData.overview.achievements.map((achievement, index) => (
+                            <li key={index} className="text-gray-200">{achievement}</li>
+                          ))}
+                        </ul>
                       </motion.div>
                     </div>
                   </div>
@@ -283,6 +370,7 @@ const Finder = () => {
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
+                    className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-20"
                   >
                     <div className="flex items-center mb-6">
                       <span className="text-3xl mr-3">{section.icon}</span>
@@ -290,90 +378,125 @@ const Finder = () => {
                     </div>
                     
                     {section.id === "experience" && (
-                      <div className="space-y-6">
-                        {section.content.map((exp, index) => (
-                          <motion.div key={index} variants={itemVariants} className="bg-gray-800 rounded-lg p-4 shadow-md">
-                            <h3 className="text-xl font-semibold text-blue-400">{exp.title}</h3>
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-gray-300">{exp.company}</span>
-                              <span className="text-gray-400 text-sm">{exp.period}</span>
-                            </div>
-                            <p className="text-gray-300">{exp.description}</p>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
+  <div className={`w-full transition-all duration-300 ${getViewMode() === 'grid' && !isMobile ? 'grid grid-cols-2 gap-6' : 'space-y-6'}`}>
+    {section.content.filter(exp => {
+      if (!searchQuery) return true;
+      return (
+        exp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        exp.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        exp.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }).map((exp, index) => (
+      <motion.div key={index} variants={itemVariants} className="bg-white bg-opacity-10 rounded-lg p-4 border border-white border-opacity-10 hover:shadow-lg hover:bg-opacity-20 transition-all">
+        <h3 className="text-xl font-semibold text-blue-300">{highlightMatch(exp.title)}</h3>
+        <div className={`${isMobile ? 'flex flex-col space-y-1' : 'flex justify-between items-center'} mb-2`}>
+          <span className="text-gray-200">{highlightMatch(exp.company)}</span>
+          <span className="text-gray-300 text-sm">{exp.period}</span>
+        </div>
+        <p className="text-gray-200">{highlightMatch(exp.description)}</p>
+      </motion.div>
+    ))}
+  </div>
+)}
                     
                     {section.id === "education" && (
-                      <div className="space-y-6">
-                        {section.content.map((edu, index) => (
-                          <motion.div key={index} variants={itemVariants} className="bg-gray-800 rounded-lg p-4 shadow-md">
-                            <h3 className="text-xl font-semibold text-blue-400">{edu.degree}</h3>
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-gray-300">{edu.institution}</span>
-                              <span className="text-gray-400 text-sm">{edu.year}</span>
-                            </div>
-                            <p className="text-gray-300">{edu.details}</p>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
+  <div className={`w-full transition-all duration-300 ${getViewMode() === 'grid' && !isMobile ? 'grid grid-cols-2 gap-6' : 'space-y-6'}`}>
+    {section.content.filter(edu => {
+      if (!searchQuery) return true;
+      return (
+        edu.degree.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        edu.institution.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        edu.details.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }).map((edu, index) => (
+      <motion.div key={index} variants={itemVariants} className="bg-white bg-opacity-10 rounded-lg p-4 border border-white border-opacity-10 hover:shadow-lg hover:bg-opacity-20 transition-all">
+        <h3 className="text-xl font-semibold text-blue-300">{highlightMatch(edu.degree)}</h3>
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-gray-200">{highlightMatch(edu.institution)}</span>
+          <span className="text-gray-300 text-sm">{edu.year}</span>
+        </div>
+        <p className="text-gray-200">{highlightMatch(edu.details)}</p>
+      </motion.div>
+    ))}
+  </div>
+)}
                     
                     {section.id === "skills" && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {section.content.map((skillGroup, index) => (
-                          <motion.div key={index} variants={itemVariants} className="bg-gray-800 rounded-lg p-4 shadow-md">
-                            <h3 className="text-xl font-semibold text-blue-400 mb-3">{skillGroup.category}</h3>
-                            <div className="flex flex-wrap gap-2">
-                              {skillGroup.skills.map((skill, i) => (
-                                <span key={i} className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm">
-                                  {skill}
-                                </span>
-                              ))}
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
+  <div className={`w-full transition-all duration-300 ${getViewMode() === 'grid' && !isMobile ? 'grid grid-cols-2 gap-6' : 'space-y-6'}`}>
+    {section.content.filter(skillGroup => {
+      if (!searchQuery) return true;
+      return (
+        skillGroup.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        skillGroup.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }).map((skillGroup, index) => (
+      <motion.div key={index} variants={itemVariants} className="bg-white bg-opacity-10 rounded-lg p-4 border border-white border-opacity-10 hover:shadow-lg hover:bg-opacity-20 transition-all">
+        <h3 className="text-xl font-semibold text-blue-300 mb-3">{highlightMatch(skillGroup.category)}</h3>
+        <ul className="flex flex-wrap gap-2">
+          {skillGroup.skills.filter(skill => {
+            if (!searchQuery) return true;
+            return skill.toLowerCase().includes(searchQuery.toLowerCase()) || skillGroup.category.toLowerCase().includes(searchQuery.toLowerCase());
+          }).map((skill, i) => (
+            <li key={i} className="bg-blue-400/20 text-blue-200 px-2 py-1 rounded text-sm font-mono">
+              {highlightMatch(skill)}
+            </li>
+          ))}
+        </ul>
+      </motion.div>
+    ))}
+  </div>
+)}
                     
                     {section.id === "projects" && (
-                      <div className="space-y-6">
-                        {section.content.map((project, index) => (
-                          <motion.div key={index} variants={itemVariants} className="bg-gray-800 rounded-lg p-4 shadow-md">
-                            <h3 className="text-xl font-semibold text-blue-400">{project.name}</h3>
-                            <p className="text-gray-300 mb-3">{project.description}</p>
-                            <div className="flex flex-wrap gap-2">
-                              {project.technologies.map((tech, i) => (
-                                <span key={i} className="bg-blue-900 bg-opacity-50 text-blue-300 px-2 py-1 rounded text-xs">
-                                  {tech}
-                                </span>
-                              ))}
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
+  <div className={`w-full transition-all duration-300 ${getViewMode() === 'grid' && !isMobile ? 'grid grid-cols-2 gap-6' : 'space-y-6'}`}>
+    {section.content.filter(project => {
+      if (!searchQuery) return true;
+      return (
+        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.technologies.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }).map((project, index) => (
+      <motion.div key={index} variants={itemVariants} className="bg-white bg-opacity-10 rounded-lg p-4 border border-white border-opacity-10 hover:shadow-lg hover:bg-opacity-20 transition-all">
+        <h3 className="text-xl font-semibold text-blue-300">{highlightMatch(project.name)}</h3>
+        <p className="text-gray-200 mb-2">{highlightMatch(project.description)}</p>
+        <div className="flex flex-wrap gap-2">
+          {project.technologies.filter(tech => {
+            if (!searchQuery) return true;
+            return tech.toLowerCase().includes(searchQuery.toLowerCase()) || project.name.toLowerCase().includes(searchQuery.toLowerCase());
+          }).map((tech, i) => (
+            <span key={i} className="bg-blue-400/20 text-blue-200 px-2 py-1 rounded text-xs font-mono">
+              {highlightMatch(tech)}
+            </span>
+          ))}
+        </div>
+      </motion.div>
+    ))}
+  </div>
+)}
                     
                     {section.id === "certifications" && (
-                      <div className="space-y-4">
+                      <div className="space-y-4 w-full">
                         {section.content.map((cert, index) => (
-                          <motion.div key={index} variants={itemVariants} className="bg-gray-800 rounded-lg p-4 shadow-md flex justify-between items-center">
+                          <motion.div key={index} variants={itemVariants} className="bg-white bg-opacity-10 rounded-lg p-4 border border-white border-opacity-10 flex justify-between items-center">
                             <div>
-                              <h3 className="text-lg font-semibold text-blue-400">{cert.name}</h3>
-                              <p className="text-gray-300">{cert.issuer}</p>
+                              <h3 className="text-lg font-semibold text-blue-300">{highlightMatch(cert.name)}</h3>
+                              <p className="text-gray-200">{highlightMatch(cert.issuer)}</p>
+                              <h3 className="text-lg font-semibold text-blue-300">{cert.name}</h3>
+                              <p className="text-gray-200">{cert.issuer}</p>
                             </div>
-                            <span className="text-gray-400">{cert.year}</span>
+                            <span className="text-gray-300">{cert.year}</span>
                           </motion.div>
                         ))}
                       </div>
                     )}
                     
                     {section.id === "languages" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
                         {section.content.map((lang, index) => (
-                          <motion.div key={index} variants={itemVariants} className="bg-gray-800 rounded-lg p-4 shadow-md">
-                            <h3 className="text-lg font-semibold text-blue-400">{lang.language}</h3>
-                            <p className="text-gray-300">{lang.proficiency}</p>
+                          <motion.div key={index} variants={itemVariants} className="bg-white bg-opacity-10 rounded-lg p-4 border border-white border-opacity-10">
+                            <h3 className="text-lg font-semibold text-blue-300">{lang.language}</h3>
+                            <p className="text-gray-200">{lang.proficiency}</p>
                           </motion.div>
                         ))}
                       </div>
@@ -387,19 +510,19 @@ const Finder = () => {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="h-full flex flex-col items-center justify-center"
+                  className="h-full flex flex-col items-center justify-center bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 border border-white border-opacity-20"
                 >
-                  <motion.div variants={itemVariants} className="text-center mb-8">
+                  <motion.div variants={itemVariants} className="text-center mb-8 w-full">
                     <span className="text-5xl mb-4 block">📄</span>
                     <h2 className="text-2xl font-bold mb-2">Full Resume</h2>
-                    <p className="text-gray-400 mb-6">View or download the complete resume</p>
+                    <p className="text-gray-300 mb-6">View or download the complete resume</p>
                   </motion.div>
                   
-                  <motion.div variants={itemVariants} className="flex space-x-4">
+                  <motion.div variants={itemVariants} className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
                     <a 
                       href="/assets/Resume_Mohammed_Atif_Ali_Neranki.pdf" 
                       target="_blank"
-                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 shadow-lg"
+                      className="px-6 py-3 bg-blue-600 bg-opacity-70 text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center space-x-2 shadow-lg border border-blue-400 border-opacity-30"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -411,7 +534,7 @@ const Finder = () => {
                     <a 
                       href="/assets/Resume_Mohammed_Atif_Ali_Neranki.pdf" 
                       download
-                      className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center space-x-2 shadow-lg"
+                      className="px-6 py-3 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 transition-colors flex items-center space-x-2 shadow-lg border border-white border-opacity-20"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />

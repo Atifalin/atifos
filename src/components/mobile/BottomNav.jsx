@@ -6,7 +6,7 @@ const BottomNav = () => {
 
   return (
     <motion.div 
-      className="glass-effect fixed bottom-0 left-0 right-0 h-16 flex items-center justify-around px-4"
+      className="fixed bottom-0 left-0 right-0 h-16 flex items-center justify-around px-4 bg-white bg-opacity-15 backdrop-blur-md border-t border-white border-opacity-20 shadow-lg"
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}

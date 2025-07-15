@@ -87,7 +87,7 @@ const DesktopUI = () => {
 
   return (
     <div 
-      className="h-screen w-screen overflow-hidden relative"
+      className="fixed top-0 left-0 w-screen h-screen overflow-hidden !flex-none !items-stretch !justify-start bg-transparent"
       style={backgroundStyle}
     >
       {/* Desktop background */}

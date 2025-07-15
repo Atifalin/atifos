@@ -3,26 +3,30 @@ import { motion, useDragControls } from 'framer-motion';
 import Terminal from '../shared/Terminal';
 import Finder from '../apps/Finder';
 import ResumeViewer from '../apps/ResumeViewer';
+import Calculator from '../apps/Calculator';
+import Calendar from '../apps/Calendar';
+import Clock from '../apps/Clock';
 
 // Map of app components
 const appComponents = {
   Terminal: Terminal,
   Finder: Finder,
   ResumeViewer: ResumeViewer,
+  Calculator: Calculator,
+  Calendar: Calendar,
+  Clock: Clock,
 };
 
 const AppWindow = ({ app, isActive, onClose, onFocus, onMinimize }) => {
   const [position, setPosition] = useState({ x: Math.random() * 100 + 50, y: Math.random() * 50 + 50 });
-  const [size, setSize] = useState({ width: 700, height: 500 });
-  const [isResizing, setIsResizing] = useState(false);
-  const [resizeDirection, setResizeDirection] = useState(null);
+  const [size, setSize] = useState({ width: Math.min(700, window.innerWidth - 40), height: Math.min(500, window.innerHeight - 100) });
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const windowRef = useRef(null);
   const dragControls = useDragControls();
-  const previousSize = useRef({ width: 700, height: 500 });
+  const previousSize = useRef({ width: Math.min(700, window.innerWidth - 40), height: Math.min(500, window.innerHeight - 100) });
   const previousPosition = useRef({ x: 100, y: 50 });
-  
+
   // Get the component for this app
   const AppComponent = appComponents[app.component] || (() => <div>App not found</div>);
 
@@ -77,41 +81,7 @@ const AppWindow = ({ app, isActive, onClose, onFocus, onMinimize }) => {
     onClose();
   };
 
-  // Handle window resize
-  const handleResizeStart = (direction) => (e) => {
-    if (isMaximized) return;
-    e.stopPropagation();
-    setIsResizing(true);
-    setResizeDirection(direction);
-    onFocus();
-  };
 
-  const handleResize = (e, info) => {
-    if (isResizing && !isMaximized) {
-      const { width, height } = size;
-      const { x, y } = info.delta;
-      
-      switch (resizeDirection) {
-        case 'right':
-          setSize({ width: Math.max(300, width + x), height });
-          break;
-        case 'bottom':
-          setSize({ width, height: Math.max(200, height + y) });
-          break;
-        case 'bottom-right':
-          setSize({ width: Math.max(300, width + x), height: Math.max(200, height + y) });
-          break;
-        default:
-          break;
-      }
-    }
-  };
-
-  const handleResizeEnd = () => {
-    setIsResizing(false);
-    setResizeDirection(null);
-  };
-  
   // Handle window restore from minimized state
   const handleRestore = () => {
     setIsMinimized(false);
@@ -204,26 +174,11 @@ const AppWindow = ({ app, isActive, onClose, onFocus, onMinimize }) => {
       
       {/* Window content */}
       <div className="bg-gray-900 bg-opacity-90 h-[calc(100%-2rem)] overflow-hidden">
-        <AppComponent />
+        <div className="h-full w-full overflow-hidden">
+          <AppComponent />
+        </div>
       </div>
-      
-      {/* Resize handles - only shown when not maximized */}
-      {!isMaximized && (
-        <>
-          <div 
-            className="absolute bottom-0 right-0 w-4 h-full cursor-ew-resize"
-            onMouseDown={handleResizeStart('right')}
-          ></div>
-          <div 
-            className="absolute bottom-0 right-0 h-4 w-full cursor-ns-resize"
-            onMouseDown={handleResizeStart('bottom')}
-          ></div>
-          <div 
-            className="absolute bottom-0 right-0 w-8 h-8 cursor-nwse-resize"
-            onMouseDown={handleResizeStart('bottom-right')}
-          ></div>
-        </>
-      )}
+     
     </motion.div>
   );
 };

@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
+import { DeviceContext } from '../../contexts/DeviceContext';
 
 const ResumeViewer = () => {
+  const { isMobile } = useContext(DeviceContext);
   const [isLoading, setIsLoading] = useState(true);
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(isMobile ? 0.7 : 1);
   const [pdfUrl] = useState('/assets/Resume_Mohammed_Atif_Ali_Neranki.pdf');
   const [pdfError, setPdfError] = useState(false);
 
@@ -99,7 +101,7 @@ const ResumeViewer = () => {
       </div>
       
       {/* PDF Viewer */}
-      <div className="flex-1 overflow-auto bg-gray-900 flex items-center justify-center">
+      <div className="flex-1 overflow-auto bg-gray-900 flex items-start justify-center">
         {isLoading && !pdfError && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-80 z-10">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -115,16 +117,17 @@ const ResumeViewer = () => {
           </div>
         ) : (
           <motion.div 
-            className="p-4"
+            className="p-4 mt-2"
             style={{ 
               transform: `scale(${scale})`,
-              transformOrigin: 'center top'
+              transformOrigin: 'center top',
+              width: isMobile ? '100%' : 'auto'
             }}
           >
             <object 
               data={pdfUrl} 
               type="application/pdf"
-              className="w-[800px] h-[1100px] border-none bg-white"
+              className={`${isMobile ? 'w-full' : 'w-[800px]'} h-[1100px] border-none bg-white`}
               onLoad={handleLoad}
               onError={handleError}
             >
