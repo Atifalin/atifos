@@ -45,3 +45,36 @@ AtifOS is built with two UX modes:
    - Adaptive app-style layout (like a mobile OS launcher)
    - Full-screen panels instead of draggable windows
    - Chat-style interface for terminal
+
+## 📊 Project Progress
+
+- ✅ **M1: Setup & CI/CD** - Project structure, GitHub repo, Tailwind CSS, Vercel deployment
+- ✅ **M2: Boot + Login** - Enhanced boot animation and login transitions
+- ✅ **M3: Shell & Finder** - Desktop shell, window management, Finder app
+  - ✅ Window controls (minimize, maximize, close) and dragging
+  - ✅ macOS Sonoma-inspired Liquid Glass UI
+  - ✅ Resume integration in Finder and ResumeViewer
+- 🔄 **M4: Terminal & MiniMe** - Coming soon
+- 🔄 **M5: Mobile Experience** - Coming soon
+- 🔄 **M6: Polish & Deploy** - In progress
+
+## 🖼️ Screenshots
+
+*Screenshots will be added after deployment*
+
+## 🔗 Live Demo
+
+Visit [AtifOS](https://atif-os.vercel.app) to see the live demo.
+
+- 📝 **Future Milestones**
+  - M4: Terminal + OpenAI
+  - M5: Mini-Me Assistant
+  - M6: Apps (Photos, Projects, Skills)
+  - M7: Mobile Experience
+  - M8: Polish & Performance
+
+## 🌐 Deployment
+
+The project is deployed at:
+- [https://atif-os.vercel.app](https://atif-os.vercel.app)
+- Custom domain: atifos.atifalin.in (pending DNS configuration)
