@@ -5,6 +5,7 @@ import './index.css'
 // Context providers
 import { DeviceProvider } from './contexts/DeviceContext'
 import { ProfileProvider } from './contexts/ProfileContext'
+import { AppStateProvider } from './contexts/AppStateContext'
 
 // Components
 import DesktopUI from './components/desktop/DesktopUI'
@@ -256,12 +257,14 @@ function App() {
           >
             <ProfileProvider initialProfile={selectedProfile}>
               <DeviceProvider>
-                {/* Main OS components */}
-                <DesktopUI />
-                <MobileWrapper />
-                
-                {/* Shared components */}
-                <MiniMe isVisible={true} />
+                <AppStateProvider>
+                  {/* Main OS components */}
+                  <DesktopUI />
+                  <MobileWrapper />
+                  
+                  {/* Shared components */}
+                  <MiniMe isVisible={true} />
+                </AppStateProvider>
               </DeviceProvider>
             </ProfileProvider>
           </motion.div>

@@ -46,8 +46,10 @@ const Dock = ({ onAppClick, openApps = [], onRestoreMinimized = () => {} }) => {
 
   return (
     <motion.div
-      className="fixed bottom-8 inset-x-0 flex justify-center z-30"
-      style={{ pointerEvents: 'auto', width: 'auto', display: 'flex' }}
+      className="dock-container"
+      style={{ 
+        pointerEvents: 'auto'
+      }}
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 20 }}

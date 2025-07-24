@@ -14,8 +14,8 @@ AtifOS is an interactive, OS-style personal resume built using React, inspired b
 
 - **Framework**: React with Vite
 - **Styling**: Tailwind CSS / SCSS + Glassmorphism
-- **Animation**: Spline (boot/logo), GIFs (Mini-Me), Framer Motion
-- **3D Effects**: Three.js (desktop background parallax)
+- **Animation**: Spline (boot/logo), Framer Motion for UI animations
+- **Interactive Background**: ReactBits DotGrid with interactive glow effects
 - **AI Integration**: OpenAI API (resume-aware terminal)
 - **Hosting**: Vercel / Netlify
 
@@ -54,9 +54,9 @@ AtifOS is built with two UX modes:
   - ✅ Window controls (minimize, maximize, close) and dragging
   - ✅ macOS Sonoma-inspired Liquid Glass UI
   - ✅ Resume integration in Finder and ResumeViewer
-- 🔄 **M4: Terminal & MiniMe** - Coming soon
-- 🔄 **M5: Mobile Experience** - Coming soon
-- 🔄 **M6: Polish & Deploy** - In progress
+- ✅ **M4: Terminal & MiniMe** - Interactive terminal with commands and context-aware MiniMe assistant
+- 🔄 **M5: Mobile Experience** - In progress
+- ✅ **M6: Interactive Background** - Replaced parallax with interactive dot grid background
 
 ## 🖼️ Screenshots
 
@@ -67,11 +67,9 @@ AtifOS is built with two UX modes:
 Visit [AtifOS](https://atif-os.vercel.app) to see the live demo.
 
 - 📝 **Future Milestones**
-  - M4: Terminal + OpenAI
-  - M5: Mini-Me Assistant
-  - M6: Apps (Photos, Projects, Skills)
-  - M7: Mobile Experience
-  - M8: Polish & Performance
+  - M7: Additional Apps (Photos, Projects, Skills)
+  - M8: Mobile Experience Enhancement
+  - M9: Performance Optimization
 
 ## 🌐 Deployment
 

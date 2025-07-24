@@ -1,0 +1,145 @@
+# AtifOS M1: Setup & CI/CD
+
+## Notes
+- Project is "AtifOS": interactive, OS-style personal resume in React.
+- Tech stack: React, Tailwind CSS/SCSS, Framer Motion, Spline, Three.js, OpenAI API.
+- M1 refers to initial setup and CI/CD pipeline (see QRD.md).
+- Encountered issues with `npx tailwindcss init -p`; manual Tailwind config files created and Tailwind integrated into CSS.
+- Deployment target: Vercel/Netlify, with GitHub integration and preview deploys.
+- OPENAI_API_KEY required as env var in Vercel dashboard.
+- Edge Function: /api/chat for GPT proxy.
+- Custom domain: atifos.atifalin.in (auto SSL).
+- All components should be device-aware; mobile-first is fine but modular.
+- Dependencies for Framer Motion, Three.js, OpenAI, etc. installed.
+- Context files for device and profile management created.
+- Shared components (MiniMe, Terminal) implemented.
+- Desktop components (DesktopUI, TopBar) implemented.
+- Desktop components (Dock, AppWindow) implemented.
+- Mobile components (MobileWrapper, AppGrid, BottomNav, MobileAppPanel) implemented.
+- Main App component and global styles implemented.
+- Tailwind/PostCSS plugin config now uses ES module syntax; dev server runs, but Tailwind warns that the `content` option is missing or empty. Next step: fix Tailwind `content` configuration to ensure styles are generated.
+- Tailwind `content` configuration in tailwind.config.js appears correct, but warning persists; next step: troubleshoot persistent warning (check cache, file paths, or version mismatches).
+- Tailwind/PostCSS troubleshooting complete; dev server runs without warnings after clearing cache and reinstalling dependencies.
+- Vercel CLI installed; next step: deploy project to Vercel before configuring custom domain and SSL.
+- Vercel deployment failed due to missing OPENAI_API_KEY secret; must add secret in Vercel dashboard or via CLI before deployment can succeed.
+- Vercel CLI secret commands failed; will add OPENAI_API_KEY via Vercel dashboard after initial deploy. vercel.json temporarily modified to remove env reference for deployment.
+- Initial Vercel deployment successful; project is live. Next: add OPENAI_API_KEY secret via dashboard, then configure custom domain and SSL.
+- GitHub repository (https://github.com/Atifalin/atifos) initialized and code pushed.
+- OPENAI_API_KEY and custom domain are now configured in Vercel dashboard; production site loads a blank white page—need to debug production build and begin M2: Boot + Login milestone (see QRD.md).
+- Production build and entry points (main.jsx, index.html) appear correct; next debugging steps: check for runtime errors, deployment config, or missing assets. Then proceed with Boot + Login (M2).
+- Vite config updated to set base path and build options; next: redeploy and test if blank page is resolved, then proceed with Boot + Login (M2).
+- Redeployment with updated Vite config complete; verify production site loads correctly. QRD.md analyzed: Boot + Login (M2) requirements clarified—enhance boot animation, login transitions, and device-aware logic per QRD.md.
+- Framer Motion installed and Boot/Login screens enhanced with animation and transitions per QRD.md. Next: complete implementation and test transitions/device logic.
+- ProfileContext updated to accept initialProfile prop and provide detailed profile data for selected profile. Ready to test enhanced Boot + Login flow and device logic.
+- DeviceContext enhanced to provide detailed device type, orientation, touch support, and utility functions for device-aware logic per QRD.md. Next: test Boot + Login transitions and complete M2 milestone.
+- M2 Boot + Login milestone complete: enhanced Boot/Login flow with animation, device-aware logic, and profile context is implemented, tested, and deployed. Ready to begin M3: Shell & Finder (see QRD.md).
+- Vercel deployment issue (blank white page, MIME errors) resolved by simplifying Vite and Vercel configuration, removing OpenAI API key from config.
+- Deployment now works as expected at both Vercel and custom domain (once DNS is set).
+- Added new assets: Resume_India_Optimized.md (resume info), assets/Mo.png (profile image), assets/Resume_Mohammed_Atif_Ali_Neranki.pdf (resume PDF).
+- Ready to begin M3: Shell & Finder; review QRD.md and integrate new resume/profile assets.
+- Successfully deployed AtifOS to Vercel and custom domain; added new assets for resume and profile information.
+- Next steps for M3: Shell & Finder include implementing shell navigation, finder functionality, and integrating new resume/profile assets.
+- QRD.md reviewed: M3 requires desktop shell (top bar, dock), window management, Finder app for resume exploration, and integration of new resume/profile assets (Resume_India_Optimized.md, assets/Mo.png, Resume PDF).
+- Resume_India_Optimized.md reviewed: contains structured resume data to be used in Finder and Resume Viewer apps.
+- Finder and ResumeViewer components created; AppWindow and Dock updated to support new apps.
+- Confirmed public/assets contains Mo.png and Resume_Mohammed_Atif_Ali_Neranki.pdf; ready for final integration testing.
+- User feedback: UI needs to be more polished and macOS-like (see provided image).
+- AppWindow, Dock, and ResumeViewer refactored to support proper window controls, dragging, minimizing, and PDF error handling.
+- TopBar and Finder components updated for more macOS-like appearance.
+- Lint and syntax errors detected in Finder.jsx after last UI update—must fix these before further polish.
+- Finder component successfully rewritten and integrated with clean, macOS-like UI.
+- User now requests UI to match latest macOS Sonoma "clear glass" (Liquid Glass) style, with transparent, blurred, and glassy effects for TopBar, windows, Dock, etc. (see web search results for references).
+- TopBar and dropdown menus updated to use Sonoma-style glass effect (transparent, blurred, white glass look).
+- AppWindow glass effect update complete.
+- Dock glass effect update complete.
+- Desktop background updated for more modern Sonoma look.
+- All major Sonoma glass UI updates (TopBar, AppWindow, Dock, background) now implemented.
+- Sonoma glass UI milestone complete; ready to deploy, update README/plan, and push to GitHub.
+- Deployment, documentation, and push to GitHub now complete.
+- Next milestone in progress: Update mobile components (AppGrid, BottomNav, MobileAppPanel, Finder, ResumeViewer) to match Sonoma glass UI and feature parity per QRD.md.
+- MobileWrapper background updated for Sonoma glass UI (complete)
+- AppGrid updated for Sonoma glass UI (complete)
+- BottomNav updated for Sonoma glass UI (complete)
+- MobileAppPanel updated for Sonoma glass UI (complete)
+- Mobile app list in AppGrid updated to match QRD.md (complete)
+- Finder and ResumeViewer now mapped in MobileAppPanel for mobile UI parity (in progress)
+- Finder toolbar, sidebar, and content sections now being refactored for responsive Sonoma glass UI (in progress)
+- Syntax/lint errors encountered in Finder component after mobile responsiveness edits; must fix these as part of ongoing refactor
+- Full rewrite of Finder component for mobile Sonoma glass UI and to fix syntax/lint errors is underway
+- Finder component rewrite for mobile Sonoma glass UI complete; next: fix "app not found" issues on mobile
+- Once Finder UI is fixed, next step is to fix "app not found" issues on mobile so launching apps works correctly
+- User requests: Fix Finder spacing/overlapping issues (mobile & desktop) and enable responsive resizing for desktop app windows
+- Finder spacing/overlapping issues have been addressed and are now complete
+- User reports: ResumeViewer is not responsive and the top of the first page is not visible
+- ResumeViewer is now fully responsive and displays the top of the first page
+- User requests: Refine Finder UI for desktop, make it smoother, and add functionality to the search bar and layout buttons
+- User requests: Center the dock (desktop mode), add Calculator, Calendar, and Clock apps (with mobile versions), and make them accessible from the TopBar on desktop
+- Desktop: "App not found" for Calculator/Calendar/Clock is due to missing component mapping in desktop app window logic. Mobile versions work.
+- TopBar: Only Calendar (on date click) and Clock (on time click) should be quick-launched; Calculator should not appear in TopBar.
+- AppWindow resizing functionality has been removed per user request; windows are now fixed-size except for maximize.
+- Dock centering issue persists and still needs to be addressed.
+- Dock centering is likely affected by global CSS: index.css sets body to flex and place-items-center, and DesktopUI uses w-screen/overflow-hidden; these may cause horizontal drift for absolutely/fixed-positioned Dock. Need to adjust global or parent layout to ensure pixel-perfect centering.
+- Despite multiple CSS/layout fixes, Dock remains off-center; user requests a full Dock rewrite to be larger and match latest macOS (Sonoma) style. Rewrite should ensure perfect centering and modern visual polish.
+
+## Task List
+- [x] Initialize React project structure (using Vite or Create React App)
+- [x] Set up GitHub repository
+- [x] Set up Tailwind CSS and SCSS
+- [x] Add base folder/component structure as per QRD.md
+- [x] Configure Vercel/Netlify for CI/CD with GitHub integration
+- [x] Set up environment variables (OPENAI_API_KEY)
+- [x] Add Edge Function for /api/chat endpoint
+- [x] Verify preview deploys and main branch deploy
+- [x] Fix Tailwind/PostCSS plugin configuration and verify dev server runs
+- [x] Troubleshoot persistent Tailwind `content` warning (cache, paths, or version)
+- [x] Deploy project to Vercel
+- [x] Add OPENAI_API_KEY secret to Vercel via dashboard after initial deploy
+- [x] Configure custom domain (atifos.atifalin.in) and SSL
+- [x] Debug blank white page on production (atifos.atifalin.in)
+- [x] Analyze QRD.md and begin M2: Boot + Login implementation
+- [x] Verify production site after redeploy (atifos.atifalin.in)
+- [x] Implement enhanced Boot + Login (M2) per QRD.md
+- [x] Test Boot + Login transitions and device logic
+- [x] Fix Vercel deployment blank page/MIME error (simplify config, remove OpenAI API key)
+- [x] Review QRD.md and new resume/profile assets
+- [x] Implement desktop shell (TopBar, Dock, window management)
+- [x] Implement Finder app for resume exploration
+- [x] Integrate Resume_India_Optimized.md, assets/Mo.png, and Resume PDF into Finder/Resume Viewer
+- [x] Test and polish Finder/ResumeViewer integration
+- [x] Fix window controls (minimize, maximize, close) in AppWindow
+- [x] Enable dragging/moving of app windows
+- [x] Fix ResumeViewer functionality
+- [x] Fix syntax/lint errors in Finder component
+- [x] Polish UI to match provided image (macOS-like look)
+- [x] Polish UI to match macOS Sonoma "clear glass" (Liquid Glass) style
+  - [x] Update TopBar and dropdowns to Sonoma glass effect
+  - [x] Update AppWindow to Sonoma glass effect
+  - [x] Update Dock to Sonoma glass effect
+- [x] Deploy latest version to Vercel/Netlify
+- [x] Update README with Sonoma UI milestone and screenshots
+- [x] Update plan.md to reflect deployment and documentation
+- [x] Commit and push all changes to GitHub
+- [ ] Update mobile components for Sonoma glass UI (in progress)
+  - [x] Update AppGrid, BottomNav, MobileAppPanel for glass effect (AppGrid, BottomNav, MobileWrapper, and MobileAppPanel complete)
+  - [x] Update mobile app list per QRD.md (Finder, ResumeViewer, etc.)
+  - [x] Update Finder and ResumeViewer for mobile glass UI (complete)
+    - [x] Rewrite Finder component for mobile glass UI and fix syntax/lint errors (complete)
+    - [x] Fix "app not found" issues on mobile so launching apps works correctly (complete)
+  - [ ] Polish mobile UI and UX for parity with desktop
+  - [x] Fix Finder spacing and overlapping issues (mobile & desktop)
+  - [x] Remove AppWindow resize functionality (make windows fixed-size except for maximize)
+  - [x] Make ResumeViewer fully responsive and ensure top of first page is visible
+  - [x] Refine Finder UI for desktop (smoother glass UI, transitions, polish)
+  - [x] Implement Finder search bar functionality (filter, highlight, reset)
+  - [x] Implement Finder layout buttons (toggle list/grid, animate)
+  - [x] Center Dock on desktop
+  - [x] Add Calculator app (desktop & mobile)
+  - [x] Add Calendar app (desktop & mobile)
+  - [x] Add Clock app (desktop & mobile)
+  - [x] Fix desktop app window/component mapping for Calculator, Calendar, Clock
+  - [x] Update TopBar: launch Calendar on date click, Clock on time click (remove Calculator quick-launch)
+  - [x] Make Calculator, Calendar, Clock accessible from TopBar (desktop)
+  - [ ] Rewrite Dock for larger, latest macOS (Sonoma) style and ensure perfect centering
+
+## Current Goal
+Rewrite and visually upgrade the Dock
